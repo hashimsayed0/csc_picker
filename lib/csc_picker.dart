@@ -703,8 +703,11 @@ class CSCPickerState extends State<CSCPicker> {
         if (result != null) addCountryToList(result);
       });
     } else {
+      addCountryToList(countries[100]); // Add India first
       countries.forEach((data) {
-        addCountryToList(data);
+        if (data['name'] != 'India'){
+          addCountryToList(data);
+        }
       });
     }
     _setDefaultCountry();
@@ -762,6 +765,10 @@ class CSCPickerState extends State<CSCPicker> {
       });
     });
     _states.sort((a, b) => a!.compareTo(b!));
+    if (_states.contains('Kerala')) {
+      _states.remove('Kerala');
+      _states.insert(0, 'Kerala');
+    }
     return _states;
   }
 
