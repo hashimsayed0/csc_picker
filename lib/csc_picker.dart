@@ -705,7 +705,7 @@ class CSCPickerState extends State<CSCPicker> {
     } else {
       addCountryToList(countries[100]); // Add India first
       countries.forEach((data) {
-        if (data['name'] != 'India'){
+        if (data['name'] != 'India') {
           addCountryToList(data);
         }
       });
@@ -929,16 +929,8 @@ class CSCPickerState extends State<CSCPicker> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        if (widget.title != null || widget.showClearButton)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (widget.title != null) Expanded(flex: 2, child: widget.title!),
-              if (widget.showClearButton)
-                Expanded(flex: 1, child: clearButton()),
-            ],
-          ),
-        if (widget.title != null || widget.showClearButton)
+        if (widget.title != null) widget.title!,
+        if (widget.title != null)
           const SizedBox(
             height: 10.0,
           ),
@@ -987,8 +979,36 @@ class CSCPickerState extends State<CSCPicker> {
                       : Container()
                 ],
               ),
+        if (widget.showClearButton && canClearSelections())
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 140),
+                child: clearButton(),
+              ),
+            ),
+          ),
       ],
     );
+  }
+
+  bool canClearSelections() {
+    final hasSingleCountry = _selectedCountry != null;
+    final hasSingleState = _selectedState != widget.stateDropdownLabel;
+    final hasSingleCity = _selectedCity != widget.cityDropdownLabel;
+
+    final hasMultiCountries = _selectedCountries?.isNotEmpty ?? false;
+    final hasMultiStates = _selectedStates?.isNotEmpty ?? false;
+    final hasMultiCities = _selectedCities?.isNotEmpty ?? false;
+
+    return hasSingleCountry ||
+        hasSingleState ||
+        hasSingleCity ||
+        hasMultiCountries ||
+        hasMultiStates ||
+        hasMultiCities;
   }
 
   ///filter Country Data according to user input

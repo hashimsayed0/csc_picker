@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class DropdownWithSearch<T> extends StatelessWidget {
@@ -38,56 +39,73 @@ class DropdownWithSearch<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final borderColor = colorScheme.onSurface.withValues(alpha: 0.2);
+
     return AbsorbPointer(
       absorbing: disabled,
       child: GestureDetector(
         onTap: () {
-          showDialog(
-              context: context,
-              builder: (context) => SearchDialog(
-                  placeHolder: placeHolder,
-                  title: title,
-                  searchInputRadius: searchBarRadius,
-                  dialogRadius: dialogRadius,
-                  titleStyle: dropdownHeadingStyle,
-                  itemStyle: itemStyle,
-                  items: items)).then((value) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(dialogRadius ?? 14),
+              ),
+            ),
+            builder: (context) => SearchBottomSheet(
+              placeHolder: placeHolder,
+              title: title,
+              searchInputRadius: searchBarRadius,
+              sheetRadius: dialogRadius,
+              titleStyle: dropdownHeadingStyle,
+              itemStyle: itemStyle,
+              items: items,
+            ),
+          ).then((value) {
             onChanged(value);
-            /* if(value!=null)
-                    {
-                      onChanged(value);
-                      _lastSelected = value;
-                    }
-                    else {
-                      print("Value NULL $value $_lastSelected");
-                      onChanged(_lastSelected);
-                    }*/
           });
         },
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          padding: EdgeInsets.all(15),
           decoration: !disabled
-              ? decoration != null
-                  ? decoration
-                  : BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                      color: Colors.white,
-                      border: Border.all(color: Colors.grey.shade300, width: 1))
-              : disabledDecoration != null
-                  ? disabledDecoration
-                  : BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                      color: Colors.grey.shade300,
-                      border:
-                          Border.all(color: Colors.grey.shade300, width: 1)),
+              ? decoration ??
+                  BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.3),
+                      width: 1.0,
+                    ),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surface
+                        .withValues(alpha: 0.8),
+                  )
+              : disabledDecoration ??
+                  BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.2),
+                      width: 1.0,
+                    ),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surface
+                        .withValues(alpha: 0.4),
+                  ),
           child: Row(
             children: [
               Expanded(
                   child: Text(selected.toString(),
                       overflow: TextOverflow.ellipsis,
-                      style: selectedItemStyle != null
-                          ? selectedItemStyle
-                          : TextStyle(fontSize: 14))),
+                      style: selectedItemStyle ?? TextStyle(fontSize: 14))),
               Icon(Icons.keyboard_arrow_down_rounded)
             ],
           ),
@@ -97,32 +115,31 @@ class DropdownWithSearch<T> extends StatelessWidget {
   }
 }
 
-class SearchDialog extends StatefulWidget {
+class SearchBottomSheet extends StatefulWidget {
   final String title;
   final String placeHolder;
   final List items;
   final TextStyle? titleStyle;
   final TextStyle? itemStyle;
   final double? searchInputRadius;
+  final double? sheetRadius;
 
-  final double? dialogRadius;
-
-  const SearchDialog(
-      {Key? key,
-      required this.title,
-      required this.placeHolder,
-      required this.items,
-      this.titleStyle,
-      this.searchInputRadius,
-      this.dialogRadius,
-      this.itemStyle})
-      : super(key: key);
+  const SearchBottomSheet({
+    Key? key,
+    required this.title,
+    required this.placeHolder,
+    required this.items,
+    this.titleStyle,
+    this.searchInputRadius,
+    this.sheetRadius,
+    this.itemStyle,
+  }) : super(key: key);
 
   @override
-  _SearchDialogState createState() => _SearchDialogState();
+  _SearchBottomSheetState createState() => _SearchBottomSheetState();
 }
 
-class _SearchDialogState<T> extends State<SearchDialog> {
+class _SearchBottomSheetState extends State<SearchBottomSheet> {
   TextEditingController textController = TextEditingController();
   late List filteredList;
 
@@ -154,194 +171,194 @@ class _SearchDialogState<T> extends State<SearchDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomDialog(
-      shape: RoundedRectangleBorder(
-          borderRadius: widget.dialogRadius != null
-              ? BorderRadius.circular(widget.dialogRadius!)
-              : BorderRadius.circular(14)),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    widget.title,
-                    style: widget.titleStyle != null
-                        ? widget.titleStyle
-                        : TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                ),
-                IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () {
-                      FocusScope.of(context).unfocus();
-                      Navigator.pop(context);
-                    })
-                /*Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                    onPressed: () {
-                      FocusScope.of(context).unfocus();
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      'Close',
-                      style: widget.titleStyle != null
-                          ? widget.titleStyle
-                          : TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                    )),
-              )*/
-              ],
+    final colorScheme = Theme.of(context).colorScheme;
+    final bottomViewInset = MediaQuery.of(context).viewInsets.bottom;
+    final borderColor = colorScheme.onSurface.withValues(alpha: 0.2);
+    final sheetBackgroundColor =
+        Theme.of(context).bottomSheetTheme.backgroundColor ??
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.1);
+    final actionsBackgroundColor =
+        colorScheme.surfaceContainerHighest.withValues(alpha: 0.3);
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomViewInset),
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) {
+          return Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: sheetBackgroundColor,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
             ),
-            SizedBox(height: 5),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                autofocus: true,
-                decoration: InputDecoration(
-                  isDense: true,
-                  prefixIcon: Icon(Icons.search),
-                  hintText: widget.placeHolder,
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                        widget.searchInputRadius != null
-                            ? Radius.circular(widget.searchInputRadius!)
-                            : Radius.circular(5)),
-                    borderSide: const BorderSide(
-                      color: Colors.black26,
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: [
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _PinnedSearchHeaderDelegate(
+                    height: 128,
+                    child: Material(
+                      color: sheetBackgroundColor,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: sheetBackgroundColor,
+                          border: Border(
+                            bottom: BorderSide(
+                              color:
+                                  colorScheme.onSurface.withValues(alpha: 0.06),
+                            ),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.only(top: 14),
+                              child: Center(
+                                child: Container(
+                                  width: 60,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.onSurface
+                                        .withValues(alpha: 0.3),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 16),
+                                  child: Text(
+                                    widget.title,
+                                    style: widget.titleStyle ??
+                                        TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.close),
+                                  onPressed: () {
+                                    FocusScope.of(context).unfocus();
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: TextField(
+                                autofocus: true,
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(Icons.search),
+                                  hintText: widget.placeHolder,
+                                  border: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: borderColor,
+                                    ),
+                                  ),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: borderColor,
+                                    ),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: borderColor,
+                                    ),
+                                  ),
+                                  disabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: borderColor,
+                                    ),
+                                  ),
+                                  errorBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: borderColor,
+                                    ),
+                                  ),
+                                  focusedErrorBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: borderColor,
+                                    ),
+                                  ),
+                                ),
+                                style:
+                                    widget.itemStyle ?? TextStyle(fontSize: 14),
+                                controller: textController,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                        widget.searchInputRadius != null
-                            ? Radius.circular(widget.searchInputRadius!)
-                            : Radius.circular(5)),
-                    borderSide: const BorderSide(color: Colors.black12),
-                  ),
                 ),
-                style: widget.itemStyle != null
-                    ? widget.itemStyle
-                    : TextStyle(fontSize: 14),
-                controller: textController,
-              ),
-            ),
-            SizedBox(height: 5),
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.all(widget.dialogRadius != null
-                    ? Radius.circular(widget.dialogRadius!)
-                    : Radius.circular(5)),
-                //borderRadius: widget.dialogRadius!=null?BorderRadius.circular(widget.dropDownRadius!):BorderRadius.circular(14),
-                child: ListView.builder(
-                    itemCount: filteredList.length,
-                    itemBuilder: (context, index) {
-                      return InkWell(
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return Container(
+                        color: actionsBackgroundColor,
+                        child: InkWell(
                           onTap: () {
                             FocusScope.of(context).unfocus();
                             Navigator.pop(context, filteredList[index]);
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 18),
+                                vertical: 12, horizontal: 18),
                             child: Text(
                               filteredList[index].toString(),
-                              style: widget.itemStyle != null
-                                  ? widget.itemStyle
-                                  : TextStyle(fontSize: 14),
+                              style:
+                                  widget.itemStyle ?? TextStyle(fontSize: 14),
                             ),
-                          ));
-                    }),
-              ),
+                          ),
+                        ),
+                      );
+                    },
+                    childCount: filteredList.length,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 }
 
-class CustomDialog extends StatelessWidget {
-  /// Creates a dialog.
-  ///
-  /// Typically used in conjunction with [showDialog].
-  const CustomDialog({
-    Key? key,
-    this.child,
-    this.insetAnimationDuration = const Duration(milliseconds: 100),
-    this.insetAnimationCurve = Curves.decelerate,
-    this.shape,
-    this.constraints = const BoxConstraints(
-        minWidth: 280.0, minHeight: 280.0, maxHeight: 400.0, maxWidth: 400.0),
-  }) : super(key: key);
+class _PinnedSearchHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final double height;
+  final Widget child;
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.child}
-  final Widget? child;
-
-  /// The duration of the animation to show when the system keyboard intrudes
-  /// into the space that the dialog is placed in.
-  ///
-  /// Defaults to 100 milliseconds.
-  final Duration insetAnimationDuration;
-
-  /// The curve to use for the animation shown when the system keyboard intrudes
-  /// into the space that the dialog is placed in.
-  ///
-  /// Defaults to [Curves.fastOutSlowIn].
-  final Curve insetAnimationCurve;
-
-  /// {@template flutter.material.dialog.shape}
-  /// The shape of this dialog's border.
-  ///
-  /// Defines the dialog's [Material.shape].
-  ///
-  /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0.
-  /// {@endtemplate}
-  final ShapeBorder? shape;
-  final BoxConstraints constraints;
-
-  Color _getColor(BuildContext context) {
-    return Theme.of(context).dialogBackgroundColor;
-  }
-
-  // TODO(johnsonmh): Update default dialog border radius to 4.0 to match material spec.
-  static const RoundedRectangleBorder _defaultDialogShape =
-      RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(2.0)));
+  _PinnedSearchHeaderDelegate({
+    required this.height,
+    required this.child,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    final DialogThemeData dialogTheme = DialogTheme.of(context);
-    return AnimatedPadding(
-      padding: MediaQuery.of(context).viewInsets +
-          const EdgeInsets.symmetric(horizontal: 22.0, vertical: 24.0),
-      duration: insetAnimationDuration,
-      curve: insetAnimationCurve,
-      child: MediaQuery.removeViewInsets(
-        removeLeft: true,
-        removeTop: true,
-        removeRight: true,
-        removeBottom: true,
-        context: context,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: constraints,
-            child: Material(
-              elevation: 15.0,
-              color: _getColor(context),
-              type: MaterialType.card,
-              child: child,
-              shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
-            ),
-          ),
-        ),
-      ),
-    );
+  double get minExtent => height;
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(covariant _PinnedSearchHeaderDelegate oldDelegate) {
+    return oldDelegate.height != height || oldDelegate.child != child;
   }
 }
