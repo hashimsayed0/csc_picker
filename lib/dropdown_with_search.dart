@@ -184,9 +184,8 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
     return Padding(
       padding: EdgeInsets.only(bottom: bottomViewInset),
       child: DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.3,
-        maxChildSize: 0.9,
+        initialChildSize: 0.7,
+        maxChildSize: 0.94,
         expand: false,
         builder: (context, scrollController) {
           return Container(
