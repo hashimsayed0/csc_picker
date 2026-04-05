@@ -179,6 +179,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
             colorScheme.surfaceContainerHighest.withValues(alpha: 0.1);
     final actionsBackgroundColor =
         colorScheme.surfaceContainerHighest.withValues(alpha: 0.3);
+    final headerBackgroundColor = actionsBackgroundColor.withValues(alpha: 1);
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomViewInset),
@@ -202,10 +203,10 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
                   delegate: _PinnedSearchHeaderDelegate(
                     height: 128,
                     child: Material(
-                      color: sheetBackgroundColor,
+                      color: headerBackgroundColor,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: sheetBackgroundColor,
+                          color: headerBackgroundColor,
                           border: Border(
                             bottom: BorderSide(
                               color:
